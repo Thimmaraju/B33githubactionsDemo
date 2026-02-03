@@ -1,0 +1,146 @@
+import { test, expect } from '@playwright/test';
+
+
+
+let credentials = {
+
+    username: "Admin",
+    password: "admin123",
+    invalidusername: "kjehrhbfhbr",
+
+}
+
+test.describe("Login functionality ", () => {
+
+    test.beforeEach(async ({page})=>{
+
+     await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+
+    })
+
+
+
+    test('Verify logo visibility', {tag: "@smoke"}, async ({ page }) => {
+
+        await expect(page.getByRole('img', { name: 'company-branding' })).toBeVisible();
+    });
+
+
+
+    test('Verify login with valid credentials',{tag: ["@smoke", "@important"]}, async ({ page }) => {
+
+      test.slow()
+
+      
+
+        await page.locator("input[name='username']").fill("Admin")
+
+        await page.locator("//input[@placeholder='Password']").fill("admin123")
+        await page.locator("//button[@type='submit']").click()
+        // assertion - validation
+
+        await expect(page).toHaveURL('https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index')
+
+        await expect(page.locator("//span[text()='PIM']")).toBeVisible()
+
+        await page.locator('//a[@href="/web/index.php/pim/viewPimModule"]').click()
+
+    });
+
+
+
+    test('Verify login valid Username and Invalid password', async ({ page }) => {
+
+        credentials['invalidpassword'] = "nerfkjnrf"
+     
+
+        await page.locator("input[name='username']").fill("Admin")
+
+        await page.locator("//input[@placeholder='Password']").fill("wnvjkn")
+        await page.locator("//button[@type='submit']").click()
+        // assertion - validation
+
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible()
+
+
+    });
+
+    test('Verify login invalid Username and valid password', async ({ page }) => {
+
+        //actions 
+
+
+        await page.locator("input[name='username']").fill("loginda")
+
+        await page.locator("//input[@placeholder='Password']").fill("admin123")
+        await page.locator("//button[@type='submit']").click()
+        // assertion - validation
+
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible()
+
+
+    });
+
+    test('Verify login invalid Username and invalid password', async ({ page }) => {
+
+        //actions 
+       
+
+        await page.locator("input[name='username']").fill("wrongUsername")
+
+        await page.locator("//input[@placeholder='Password']").fill("logindata")
+        await page.locator("//button[@type='submit']").click()
+        // assertion - validation
+
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible()
+
+
+    });
+
+
+
+    test.skip('Verify login with blank fields', async ({ page }) => {
+
+        //actions 
+       
+        await page.locator("//button[@type='submit']").click()
+
+        // assertion - validation
+
+        await expect(page.locator("(//span[contains(@class,'oxd-text oxd-text--span')])[1]")).toBeVisible()
+
+        await expect(page.locator("(//span[contains(@class,'oxd-text oxd-text--span')])[2]")).toBeVisible()
+
+
+
+    });
+
+
+
+    test('Verify login with SQL injection attempt', async ({ page }) => {
+
+        await page.locator("input[name='username']").fill("' OR '1'='1");
+        await page.locator("//input[@placeholder='Password']").fill("' OR '1'='1");
+        await page.locator("//button[@type='submit']").click();
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible();
+    });
+
+    test('Verify login with special characters in credentials', async ({ page }) => {
+
+        await page.locator("input[name='username']").fill("admin!@#$%");
+        await page.locator("//input[@placeholder='Password']").fill("pass<>?");
+        await page.locator("//button[@type='submit']").click();
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible();
+    });
+
+    test('Verify login with whitespace in username', async ({ page }) => {
+ 
+        await page.locator("input[name='username']").fill("  admin  ");
+        await page.locator("//input[@placeholder='Password']").fill("logi");
+        await page.locator("//button[@type='submit']").click();
+        await expect(page.locator("//p[text()='Invalid credentials']")).toBeVisible();
+    });
+
+   
+
+})
